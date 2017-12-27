@@ -1,4 +1,5 @@
 import collections
+import itertools
 import os
 import random
 
@@ -65,7 +66,7 @@ def train_policy_gradients(game_spec,
             mini_batch_moves.append(move)
             return game_spec.flat_move_to_tuple(move.argmax())
 
-        for episode_number in range(1, number_of_games):
+        for episode_number in itertools.count(1):
             # randomize if going first or second
             if (not randomize_first_player) or bool(random.getrandbits(1)):
                 reward = game_spec.play_game(make_training_move, opponent_func)
