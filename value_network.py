@@ -27,7 +27,7 @@ TEST_SAMPLES = 10000
 # to play a different game change this to another spec, e.g TicTacToeXGameSpec or ConnectXGameSpec
 game_spec = TicTacToeGameSpec()
 
-NUMBER_RANDOM_RANGE = (1, game_spec.board_squares() * 0.8)
+NUMBER_RANDOM_RANGE = (1, int(game_spec.board_squares() * 0.8))
 
 
 # it would be good to have real board positions, but failing that just generate random ones

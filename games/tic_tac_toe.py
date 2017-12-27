@@ -160,6 +160,44 @@ def random_player(board_state, _):
     moves = list(available_moves(board_state))
     return random.choice(moves)
 
+def generate_perfect_play():
+    memory = {}
+    positions_seen = [0]
+    def generate(board_state, player):
+        positions_seen[0] += 1
+        if positions_seen[0] % 10000 == 0:
+            print positions_seen[0]
+
+        winner = has_winner(board_state)
+        if winner != 0:
+            return winner
+
+        moves = list(available_moves(board_state))
+        if not moves:
+            return 0
+
+        best_moves = None
+        best_result = -2
+        for move in moves:
+            new_board = apply_move(board_state, move, player)
+            new_winner = generate(new_board, -player)
+            normalized_result = new_winner * player
+            if normalized_result == best_result:
+                best_moves.append(move)
+            elif normalized_result > best_result:
+                best_moves = [move]
+                best_result = normalized_result
+        memory[board_state, player] = best_moves
+        return best_result * player
+
+    board = _new_board()
+    generate(board, 1)
+    return memory
+
+PERFECT_MEMORY = generate_perfect_play()
+def perfect_player(game_state, side):
+    return random.choice(PERFECT_MEMORY[game_state, side])
+
 
 class TicTacToeGameSpec(BaseGameSpec):
     def __init__(self):
@@ -172,7 +210,11 @@ class TicTacToeGameSpec(BaseGameSpec):
     def board_dimensions(self):
         return 3, 3
 
+    def get_perfect_player(self):
+        return perfect_player
+
 
 if __name__ == '__main__':
     # example of playing a game
-    play_game(random_player, random_player, log=True)
+    #play_game(random_player, random_player, log=True)
+    play_game(perfect_player, perfect_player, log=True)
