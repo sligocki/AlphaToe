@@ -28,8 +28,8 @@ parser.add_argument("--opponent", default="random",
                     help="type of opponent to train against.")
 parser.add_argument("--num-games", type=int, default=1000000,
                     help="Number of games to run before stopping.")
-parser.add_argument("hidden_layers", nargs="?", default=None,
-                    help="List of hidden layer sizes, ex: [100, 100, 100]")
+parser.add_argument("hidden_layers", nargs="*", type=int,
+                    help="List of hidden layer sizes")
 args = parser.parse_args()
 
 BATCH_SIZE = 100  # every how many games to do a parameter update?
@@ -40,15 +40,14 @@ PRINT_RESULTS_EVERY_X = 10000  # every how many games to print the results
 # well may require tuning the hyper parameters a bit
 game_spec = TicTacToeGameSpec()
 
-hidden_layer_sizes = (100, 100, 100)
-if args.hidden_layers:
-  hidden_layer_sizes = eval(args.hidden_layers)
+if not args.hidden_layers:
+  args.hidden_layers = (100, 100, 100)
 
 # create_network_func = functools.partial(create_network, game_spec.board_squares(), (100, 100, 100))
-create_network_func = functools.partial(create_network, game_spec.board_squares(), hidden_layer_sizes)
+create_network_func = functools.partial(create_network, game_spec.board_squares(), args.hidden_layers)
 
 network_file_path = 'current_network'
-for n in hidden_layer_sizes:
+for n in args.hidden_layers:
   network_file_path = network_file_path + ("_%05d" % n)
 
 network_file_path = network_file_path + ".p"
