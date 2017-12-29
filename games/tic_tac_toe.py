@@ -165,7 +165,7 @@ def generate_perfect_play():
     positions_seen = [0]
     def generate(board_state, player):
         positions_seen[0] += 1
-        if positions_seen[0] % 10000 == 0:
+        if positions_seen[0] % 100000 == 0:
             print positions_seen[0]
 
         winner = has_winner(board_state)

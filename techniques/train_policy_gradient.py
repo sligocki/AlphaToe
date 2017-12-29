@@ -1,6 +1,6 @@
 import collections
 import itertools
-import os
+import os,sys
 import random
 
 import numpy as np
@@ -40,7 +40,7 @@ def train_policy_gradients(game_spec,
         (variables used in the final network : list, win rate: float)
     """
     save_network_file_path = save_network_file_path or network_file_path
-    opponent_func = game_spec.get_perfect_player() #opponent_func or game_spec.get_random_player_func()
+    opponent_func = game_spec.get_random_player_func() #game_spec.get_perfect_player() #opponent_func or game_spec.get_random_player_func()
     reward_placeholder = tf.placeholder("float", shape=(None,))
     actual_move_placeholder = tf.placeholder("float", shape=(None, game_spec.outputs()))
 
@@ -66,7 +66,7 @@ def train_policy_gradients(game_spec,
             mini_batch_moves.append(move)
             return game_spec.flat_move_to_tuple(move.argmax())
 
-        for episode_number in itertools.count(1):
+        for episode_number in xrange(1,number_of_games+1):
             # randomize if going first or second
             if (not randomize_first_player) or bool(random.getrandbits(1)):
                 reward = game_spec.play_game(make_training_move, opponent_func)
@@ -105,6 +105,7 @@ def train_policy_gradients(game_spec,
 
             if episode_number % print_results_every == 0:
                 print("episode: %s win_rate: %s" % (episode_number, _win_rate(print_results_every, results)))
+                sys.stdout.flush()
                 if network_file_path:
                     save_network(session, variables, save_network_file_path)
 

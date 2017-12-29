@@ -16,6 +16,7 @@ as good as it can do, because 3x3 tic-tac-toe is a theoretical draw, so the rand
 force a draw.
 """
 import functools
+import sys
 
 from common.network_helpers import create_network
 from games.tic_tac_toe import TicTacToeGameSpec
@@ -23,7 +24,7 @@ from techniques.train_policy_gradient import train_policy_gradients
 
 BATCH_SIZE = 100  # every how many games to do a parameter update?
 LEARN_RATE = 1e-4
-PRINT_RESULTS_EVERY_X = 1000  # every how many games to print the results
+PRINT_RESULTS_EVERY_X = 10000  # every how many games to print the results
 NETWORK_FILE_PATH = 'current_network.p'  # path to save the network to
 NUMBER_OF_GAMES_TO_RUN = 1000000
 
@@ -31,9 +32,20 @@ NUMBER_OF_GAMES_TO_RUN = 1000000
 # well may require tuning the hyper parameters a bit
 game_spec = TicTacToeGameSpec()
 
-create_network_func = functools.partial(create_network, game_spec.board_squares(), (100, 100, 100))
+hidden_layer_sizes = (100, 100, 100)
+if len(sys.argv) > 1:
+  hidden_layer_sizes = eval(sys.argv[1])
 
-train_policy_gradients(game_spec, create_network_func, NETWORK_FILE_PATH,
+# create_network_func = functools.partial(create_network, game_spec.board_squares(), (100, 100, 100))
+create_network_func = functools.partial(create_network, game_spec.board_squares(), hidden_layer_sizes)
+
+network_file_path = 'current_network'
+for n in hidden_layer_sizes:
+  network_file_path = network_file_path + ("_%05d" % n)
+
+network_file_path = network_file_path + ".p"
+
+train_policy_gradients(game_spec, create_network_func, network_file_path,
                        number_of_games=NUMBER_OF_GAMES_TO_RUN,
                        batch_size=BATCH_SIZE,
                        learn_rate=LEARN_RATE,
