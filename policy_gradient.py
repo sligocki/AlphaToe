@@ -17,6 +17,7 @@ force a draw.
 """
 import argparse
 import functools
+import random
 
 from common.network_helpers import create_network
 from games.tic_tac_toe import TicTacToeGameSpec
@@ -24,7 +25,7 @@ from techniques.train_policy_gradient import train_policy_gradients
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--opponent", default="random",
-                    choices=("random", "perfect"),
+                    choices=("random", "perfect", "mixed"),
                     help="type of opponent to train against.")
 parser.add_argument("--num-games", type=int, default=1000000,
                     help="Number of games to run before stopping.")
@@ -52,12 +53,20 @@ for n in args.hidden_layers:
 
 network_file_path = network_file_path + ".p"
 
+random_opponent = game_spec.get_random_player_func()
+perfect_opponent = game_spec.get_perfect_player()
+def mixed_opponent(*args, **kwds):
+    opponent = random.choice([random_opponent, perfect_opponent])
+    return opponent(*args, **kwds)
+
 if args.opponent == "random":
-  opponent_func = game_spec.get_random_player_func()
+    opponent_func = random_opponent
 elif args.opponent == "perfect":
-  opponent_func = game_spec.get_perfect_player()
+    opponent_func = perfect_opponent
+elif args.opponent == "mixed":
+    opponent_func = mixed_opponent
 else:
-  raise Exception, "Invalid value for --opponent"
+    raise Exception, "Invalid value for --opponent"
 
 train_policy_gradients(game_spec, create_network_func, network_file_path,
                        opponent_func=opponent_func,
