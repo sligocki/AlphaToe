@@ -28,7 +28,8 @@ parser.add_argument("--opponent", default="random",
                     choices=("random", "perfect", "mixed"),
                     help="type of opponent to train against.")
 parser.add_argument("--num-games", type=int, default=1000000,
-                    help="Number of games to run before stopping.")
+                    help="Number of games to run before stopping. "
+                    "-1 for infinite.")
 parser.add_argument("hidden_layers", nargs="*", type=int,
                     help="List of hidden layer sizes")
 args = parser.parse_args()

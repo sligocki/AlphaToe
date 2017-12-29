@@ -66,7 +66,11 @@ def train_policy_gradients(game_spec,
             mini_batch_moves.append(move)
             return game_spec.flat_move_to_tuple(move.argmax())
 
-        for episode_number in xrange(1,number_of_games+1):
+        if number_of_games == -1:
+            episode_range = itertools.count(1)
+        else:
+            episode_range = xrange(1,number_of_games+1)
+        for episode_number in episode_range:
             # randomize if going first or second
             if (not randomize_first_player) or bool(random.getrandbits(1)):
                 reward = game_spec.play_game(make_training_move, opponent_func)
