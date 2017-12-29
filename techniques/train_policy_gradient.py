@@ -40,7 +40,7 @@ def train_policy_gradients(game_spec,
         (variables used in the final network : list, win rate: float)
     """
     save_network_file_path = save_network_file_path or network_file_path
-    opponent_func = game_spec.get_random_player_func() #game_spec.get_perfect_player() #opponent_func or game_spec.get_random_player_func()
+    opponent_func = opponent_func or game_spec.get_random_player_func()
     reward_placeholder = tf.placeholder("float", shape=(None,))
     actual_move_placeholder = tf.placeholder("float", shape=(None, game_spec.outputs()))
 
