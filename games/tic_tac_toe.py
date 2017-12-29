@@ -160,14 +160,20 @@ def random_player(board_state, _):
     moves = list(available_moves(board_state))
     return random.choice(moves)
 
-def generate_perfect_play():
-    memory = {}
-    positions_seen = [0]
-    def generate(board_state, player):
-        positions_seen[0] += 1
-        if positions_seen[0] % 100000 == 0:
-            print positions_seen[0]
+def memoize(f):
+  class Memodict(dict):
+    def __getitem__(self, *key):
+      return dict.__getitem__(self, key)
+    def __missing__(self, key):
+      ret = self[key] = f(*key)
+      return ret
+  return Memodict().__getitem__
 
+def generate_perfect_play():
+    perfect_moves = {}
+
+    @memoize
+    def generate(board_state, player):
         winner = has_winner(board_state)
         if winner != 0:
             return winner
@@ -187,16 +193,16 @@ def generate_perfect_play():
             elif normalized_result > best_result:
                 best_moves = [move]
                 best_result = normalized_result
-        memory[board_state, player] = best_moves
+        perfect_moves[board_state, player] = best_moves
         return best_result * player
 
     board = _new_board()
     generate(board, 1)
-    return memory
+    return perfect_moves
 
-PERFECT_MEMORY = generate_perfect_play()
+_PERFECT_MEMORY = generate_perfect_play()
 def perfect_player(game_state, side):
-    return random.choice(PERFECT_MEMORY[game_state, side])
+    return random.choice(_PERFECT_MEMORY[game_state, side])
 
 
 class TicTacToeGameSpec(BaseGameSpec):
