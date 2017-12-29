@@ -220,7 +220,28 @@ class TicTacToeGameSpec(BaseGameSpec):
         return perfect_player
 
 
-if __name__ == '__main__':
-    # example of playing a game
-    #play_game(random_player, random_player, log=True)
-    play_game(perfect_player, perfect_player, log=True)
+def player_to_string(player):
+    if player == 1:
+        return "X"
+    elif player == -1:
+        return "O"
+    else:
+        return "."
+
+def print_game_state(game_state):
+    for row_num, row in enumerate(game_state):
+        print row_num, "|",
+        for cell in row:
+            print player_to_string(cell),
+        print
+    print
+
+def manual_player(game_state, player):
+    # Print game state.
+    print "Game State (You are %s):" % player_to_string(player)
+    print_game_state(game_state)
+
+    # Load move from user.
+    row_num = int(raw_input("Row? "))
+    col_num = int(raw_input("Col? "))
+    return (row_num, col_num)
