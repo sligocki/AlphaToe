@@ -242,6 +242,8 @@ def manual_player(game_state, player):
     print_game_state(game_state)
 
     # Load move from user.
-    row_num = int(raw_input("Row? "))
-    col_num = int(raw_input("Col? "))
+    ans = raw_input("Row Col? ")
+    row_num, col_num = ans.split()
+    row_num = int(row_num)
+    col_num = int(col_num)
     return (row_num, col_num)
