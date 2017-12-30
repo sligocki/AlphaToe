@@ -1,7 +1,9 @@
 import collections
 import itertools
-import os,sys
+import math
+import os
 import random
+import sys
 
 import numpy as np
 import tensorflow as tf
@@ -18,7 +20,8 @@ def train_policy_gradients(game_spec,
                            print_results_every=1000,
                            learn_rate=1e-4,
                            batch_size=100,
-                           randomize_first_player=True):
+                           randomize_first_player=True,
+                           draw_reward=0):
     """Train a network using policy gradients
 
     Args:
@@ -50,6 +53,8 @@ def train_policy_gradients(game_spec,
         tf.reduce_sum(tf.multiply(actual_move_placeholder, output_layer), reduction_indices=1)) * reward_placeholder
     train_step = tf.train.AdamOptimizer(learn_rate).minimize(-policy_gradient)
 
+    num_wins = num_losses = num_draws = 0
+
     with tf.Session() as session:
         session.run(tf.global_variables_initializer())
 
@@ -76,6 +81,15 @@ def train_policy_gradients(game_spec,
                 reward = game_spec.play_game(make_training_move, opponent_func)
             else:
                 reward = -game_spec.play_game(opponent_func, make_training_move)
+
+            if reward == 1:
+                num_wins += 1
+            elif reward == -1:
+                num_losses += 1
+            else:
+                assert reward == 0, reward
+                num_draws += 1
+                reward = draw_reward
 
             results.append(reward)
 
@@ -108,7 +122,13 @@ def train_policy_gradients(game_spec,
                 del mini_batch_rewards[:]
 
             if episode_number % print_results_every == 0:
-                print("episode: %s win_rate: %s" % (episode_number, _win_rate(print_results_every, results)))
+                print ("episode: %s Rates:   Wins: %6.4f  Draws: %6.4f  "
+                       "Losses: %6.4f" %
+                       (episode_number,
+                        num_wins / float(print_results_every),
+                        num_draws / float(print_results_every),
+                        num_losses / float(print_results_every)))
+                num_wins = num_draws = num_losses = 0
                 sys.stdout.flush()
                 if network_file_path:
                     save_network(session, variables, save_network_file_path)
@@ -116,8 +136,4 @@ def train_policy_gradients(game_spec,
         if network_file_path:
             save_network(session, variables, save_network_file_path)
 
-    return variables, _win_rate(print_results_every, results)
-
-
-def _win_rate(print_results_every, results):
-    return 0.5 + sum(results) / (print_results_every * 2.)
+    return variables

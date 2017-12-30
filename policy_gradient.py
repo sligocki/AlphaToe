@@ -30,13 +30,17 @@ parser.add_argument("--opponent", default="random",
 parser.add_argument("--num-games", type=int, default=1000000,
                     help="Number of games to run before stopping. "
                     "-1 for infinite.")
+parser.add_argument("--draw-reward", type=float, default=0.5,
+                    help="Reward for drawing a game. If you set it to 0, "
+                    "it learns nothing from a draw game.")
+parser.add_argument("--print-freq", type=int, default=10000,
+                    help="Every how many games to print results.")
+parser.add_argument("--learning-rate", type=float, default=1e-4)
+parser.add_argument("--batch-size", type=int, default=100,
+                    help="Every how many games to update network weights")
 parser.add_argument("hidden_layers", nargs="*", type=int,
                     help="List of hidden layer sizes")
 args = parser.parse_args()
-
-BATCH_SIZE = 100  # every how many games to do a parameter update?
-LEARN_RATE = 1e-4
-PRINT_RESULTS_EVERY_X = 10000  # every how many games to print the results
 
 # to play a different game change this to another spec, e.g TicTacToeXGameSpec or ConnectXGameSpec, to get these to run
 # well may require tuning the hyper parameters a bit
@@ -72,6 +76,7 @@ else:
 train_policy_gradients(game_spec, create_network_func, network_file_path,
                        opponent_func=opponent_func,
                        number_of_games=args.num_games,
-                       batch_size=BATCH_SIZE,
-                       learn_rate=LEARN_RATE,
-                       print_results_every=PRINT_RESULTS_EVERY_X)
+                       batch_size=args.batch_size,
+                       learn_rate=args.learning_rate,
+                       print_results_every=args.print_freq,
+                       draw_reward=args.draw_reward)

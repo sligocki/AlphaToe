@@ -116,7 +116,7 @@ def invert_board_state(board_state):
 
 
 def get_stochastic_network_move(session, input_layer, output_layer, board_state, side,
-                                valid_only=False, game_spec=None):
+                                valid_only=False, game_spec=None, log=False):
     """Choose a move for the given board_state using a stocastic policy. A move is selected using the values from the
      output_layer as a categorical probability distribution to select a single move
 
@@ -154,6 +154,16 @@ def get_stochastic_network_move(session, input_layer, output_layer, board_state,
         if prob_mag != 0.:
             probability_of_actions /= sum(probability_of_actions)
 
+    if log:
+        print "Move probabilities:"
+        width, height = 3, 3
+        index = 0
+        for x in range(width):
+            for y in range(height):
+                print "%5.3f" % probability_of_actions[index],
+                index += 1
+            print
+        print
     try:
         move = np.random.multinomial(1, probability_of_actions)
     except ValueError:

@@ -19,13 +19,14 @@ def load_network_player(network_filename, hidden_layers):
     network_helpers.load_network(session, variables, network_filename)
 
     def network_player(board_state, side):
-        move_probs = network_helpers.get_stochastic_network_move(
-            session, input_layer, output_layer, board_state, side)
-        move = game_spec.flat_move_to_tuple(move_probs.argmax())
-
         print
         print "Network player (%s)" % side
         tic_tac_toe.print_game_state(board_state)
+
+        move_probs = network_helpers.get_stochastic_network_move(
+            session, input_layer, output_layer, board_state, side, log=True)
+        move = game_spec.flat_move_to_tuple(move_probs.argmax())
+
         print "Network move:", move
         return move
     return network_player
