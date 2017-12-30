@@ -6,8 +6,12 @@ from games import tic_tac_toe
 from common import network_helpers
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--network-filename", required=True)
-parser.add_argument("--human-plays", choices=("X", "O"), default="O")
+parser.add_argument(
+    "-X", default="human",
+    metavar="{human,random,perfect,mixed,network:NETWORK_FILENAME}")
+parser.add_argument(
+    "-O", default="human",
+    metavar="{human,random,perfect,mixed,network:NETWORK_FILENAME}")
 args = parser.parse_args()
 
 game_spec = tic_tac_toe.TicTacToeGameSpec()
@@ -31,16 +35,20 @@ def load_network_player(network_filename, hidden_layers):
         return move
     return network_player
 
+def load_player(player_flag):
+    if player_flag == "human":
+        return tic_tac_toe.manual_player
+    elif player_flag == "random":
+        return game_spec.get_random_player_func()
+    elif player_flag == "perfect":
+        return tic_tac_toe.perfect_player
+    elif player_flag == "mixed":
+        raise Exception, "Not implemented"
+    else:
+        assert player_flag.startswith("network:")
+        network_filename = player_flag[len("network:"):]
+        return load_network_player(network_filename,
+                                   (100, 100, 100))
 
-network_player = load_network_player(args.network_filename,
-                                     (100, 100, 100))
-human_player = tic_tac_toe.manual_player
-if args.human_plays == "X":
-    x_player = human_player
-    o_player = network_player
-else:
-    o_player = human_player
-    x_player = network_player
-
-winner = game_spec.play_game(x_player, o_player)
+winner = game_spec.play_game(load_player(args.X), load_player(args.O))
 print "Winner:", tic_tac_toe.player_to_string(winner)
